@@ -1,0 +1,28 @@
+{% include 'header.html' %}
+
+<p><strong>{{ user }}</strong></p>
+<hr>
+<a href="/stations"><p class="h4">Select stations</p></a>
+<a href="/logout"><p class="h4">Log out</p></a>
+<hr>
+<form action="/dates" method=post>
+    {% for station in stations %}
+        {% set station_index=loop.index0 %}
+        <p class="h6">{{ station.title }}</p>
+        {% for show in station.shows %}
+            <div class="form-check">
+                <input class="form-check-input"
+                type="checkbox"
+                name="{{station_index}}:{{loop.index0}}"
+                id="{{station_index}}:{{loop.index0}}">
+                <label class="form-check-label" for="{{station_index}}:{{loop.index0}}">
+                {{ show.persons }}
+                </label>
+            </div>
+        {% endfor %}
+        <hr>
+    {% endfor %}
+    <input class="btn btn-primary "type=submit value=Next>
+</form>
+
+{% include 'footer.html' %}
