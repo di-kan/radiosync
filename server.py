@@ -1,4 +1,5 @@
 import os
+import music_tag
 from file import File
 import requests
 from subprocess import call
@@ -14,6 +15,7 @@ class Server:
 
     def delete_locals(self, days):
         self._delete(days)
+
     def push(self, days):
         print(f"pushing streams to:{self.push_path}")
         for day in days:
@@ -38,6 +40,25 @@ class Server:
             self._save(file)
         final_path = self._concat_files(day)
         day.final_file = File(local_path=final_path)
+        self.apply_tags(day)
+
+    def apply_tags(self,day):
+        # Apply new mp3 tags
+        the_file = music_tag.load_file(day.final_file.local_path)
+        the_file['artist'] = day.show.persons
+        the_file['title'] = day.description
+        the_file['album'] = day.show.station.title
+        # set artwork
+        day.show.logo.local_path = f"{self.pull_path}"
+        self._save(day.show.logo)
+        img_file = day.show.logo.local_path + day.show.logo.filename
+        with open(img_file, 'rb') as img_in:
+            the_file['artwork'] = img_in.read()
+        the_file['artwork'].first.thumbnail([64, 64])
+        the_file['artwork'].first.raw_thumbnail([64, 64])
+        the_file.save()
+
+
 
     def _save(self, file):
         resume_byte_pos = 0
