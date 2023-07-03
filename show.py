@@ -5,8 +5,9 @@ from utils import get_soup
 
 
 class ADay:
-    def __init__(self, url, description, date):
+    def __init__(self, the_show, url, description, date):
         """Initialize attributes"""
+        self.show = the_show
         self.url = url
         self.files = []
         self.date = date
@@ -24,7 +25,8 @@ class ADay:
         ret_value = ""
         for file in self.files:
             ret_value += f"'{file.local_path}{file.filename}' "
-        ret_value +=  f"'{self.final_file.local_path}{self.final_file.filename}' "
+        ret_value += f"'{self.final_file.local_path}{self.final_file.filename}' "
+        ret_value += f"'{self.show.logo.local_path}{self.show.logo.filename}' "
         return ret_value
 
     def print(self):
@@ -51,14 +53,14 @@ class Archive:
             the_date = datetime.strptime(the_date_str, "%d/%m/%Y").date()
             day_url = show['url']
             description = show['desc']
-            self.days.append(ADay(day_url, description, the_date))
+            self.days.append(ADay(self.show, day_url, description, the_date))
 
 
 
 class Show:
     def __init__(self, station, start_url, persons, logo_url):
         self.persons = persons
-        self.logo_url = logo_url
+        self.logo = File(url=logo_url)
         self.url = start_url
         self.station = station
         self.selected = False
