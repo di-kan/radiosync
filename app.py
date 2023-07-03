@@ -3,9 +3,9 @@ from os import urandom
 from dotenv import dotenv_values
 from station import RealFm, Parapolitika
 from server import Server
+import threading
 
 app = Flask(__name__)
-
 app.debug = True
 app.secret_key = urandom(24)
 
@@ -91,6 +91,12 @@ def download():
 
 
 def pull_and_push():
+    threads = list()
+    x = threading.Thread(target=_pull_and_push)
+    threads.append(x)
+    x.start()
+
+def _pull_and_push():
     for station in all_stations:
         if station.selected:
             wanted_days = station.get_selected_days()
