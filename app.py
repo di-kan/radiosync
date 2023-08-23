@@ -8,6 +8,18 @@ import threading
 app = Flask(__name__)
 app.debug = True
 app.secret_key = urandom(24)
+# Load the environment variables from .env
+env_vars = dotenv_values('.env')
+
+# Access the environment variables
+temp_folder = env_vars['TEMP']
+final_folder = env_vars['TARGET']
+
+all_stations = [RealFm("https://www.real.gr/realfm/"),
+                Parapolitika()]
+wanted_stations = []
+server = Server(temp_folder,final_folder)
+
 
 
 @app.route("/", methods=['GET','POST'])
@@ -32,7 +44,6 @@ def logout():
 
 @app.route("/stations")
 def stations():
-    global all_stations
     if 'username' in session:
         for stat in all_stations:
             stat.reset()
@@ -109,16 +120,7 @@ def _pull_and_push():
                 server.push(wanted_days, delete=True)
 
 
+# THIS WILL NOT RUN IN PRODUCTION USING GUNICORN
+# IT ONLY RUNS AS A DEVELOPMENT COMMAND
 if __name__ == "__main__":
-    # Load the environment variables from .env
-    env_vars = dotenv_values('.env')
-
-    # Access the environment variables
-    temp_folder = env_vars['TEMP']
-    final_folder = env_vars['TARGET']
-
-    all_stations = [RealFm("https://www.real.gr/realfm/"),
-                    Parapolitika()]
-    wanted_stations = []
-    server = Server(temp_folder,final_folder)
     app.run(debug=True, port=5000, host='0.0.0.0')
