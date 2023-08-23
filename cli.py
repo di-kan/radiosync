@@ -11,7 +11,7 @@ env_vars = dotenv_values('.env')
 temp_folder = env_vars['TEMP']
 final_folder = env_vars['TARGET']
 
-stations=[RealFm("https://www.real.gr/realfm/"), Parapolitika("https://dromos.ddns.net")]
+stations=[RealFm("https://www.real.gr/realfm/"), Parapolitika("https://www.parapolitika.gr/parapolitikafm/")]
 server = Server(temp_folder, final_folder)
 
 
@@ -51,7 +51,7 @@ if stations_wanted:
                 show = station.shows[show_index]
                 if len(show.archive.days) > 0 :
                     selected = pick(
-                        show.get_archive_list(),
+                        show.get_show_archive_list(),
                         "Select shows:",
                         multiselect=True,
                         min_selection_count=0,
@@ -63,14 +63,15 @@ if stations_wanted:
 
         else:
             print(f"No shows for {station.title}")
-
         clearConsole()
 
-wanted_days = stations[0].get_selected_days()
-if len(wanted_days)>0 :
-    print("####### PULLING STREAMS #######")
-    server.pull(wanted_days)
-    print("####### PULSHING STREAMS #######")
-    server.push(wanted_days)
-    print("####### DELETING LOCALS #######")
-    server.delete_locals(wanted_days)
+for station in stations:
+    if station.selected:
+        wanted_days = station.get_selected_days()
+        if len(wanted_days)>0 :
+            print("####### PULLING STREAMS #######")
+            server.pull(wanted_days)
+            print("####### PUSHING STREAMS #######")
+            server.push(wanted_days, delete=False)
+            # print("####### DELETING LOCALS #######")
+            # server.delete_locals(wanted_days)
