@@ -32,6 +32,7 @@ def logout():
 
 @app.route("/stations")
 def stations():
+    global all_stations
     if 'username' in session:
         for stat in all_stations:
             stat.reset()
