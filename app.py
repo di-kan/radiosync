@@ -16,7 +16,7 @@ def check_user():
         return redirect(url_for('stations'))
     else:
         if request.method == 'POST':
-            if request.form['password'] == "123":
+            if request.form['password'] == "1":
                 session['username'] = "dimitris"
                 return redirect(url_for('stations'))
             else:
@@ -44,12 +44,11 @@ def stations():
 
 @app.route("/shows", methods=['GET', 'POST'])
 def shows():
+    global wanted_stations
     if 'username' in session:
         if request.method == "POST":
-            stat_ind = []
             for station_wanted in request.form:
                 all_stations[int(station_wanted[0])].select()
-                stat_ind.append(int(station_wanted[0]))
             wanted_stations = [station for station in all_stations if station.selected]
             return render_template('shows.html', stations=wanted_stations)
         else:
@@ -64,10 +63,10 @@ def dates():
         if request.method == "POST":
             the_form = request.form
             for show_wanted in request.form:
-                station_index=int(show_wanted.split(":")[0])
+                station_index = int(show_wanted.split(":")[0])
                 show_index = int(show_wanted.split(":")[1])
-                all_stations[station_index].shows[show_index].select()
-            return render_template('dates.html', stations=all_stations)
+                wanted_stations[station_index].shows[show_index].select()
+            return render_template('dates.html', stations=wanted_stations)
         else:
             return redirect(url_for('check_user'))
     else:
@@ -81,7 +80,7 @@ def download():
                 station_index=int(day_wanted.split(":")[0])
                 show_index = int(day_wanted.split(":")[1])
                 day_index = int(day_wanted.split(":")[2])
-                all_stations[station_index].shows[show_index].archive.days[day_index].select()
+                wanted_stations[station_index].shows[show_index].archive.days[day_index].select()
             pull_and_push()
             return render_template('download.html')
         else:
@@ -106,9 +105,7 @@ def _pull_and_push():
                 print("####### PULLING STREAMS #######")
                 server.pull(wanted_days)
                 print("####### PULSHING STREAMS #######")
-                server.push(wanted_days)
-                print("####### DELETING LOCALS #######")
-                server.delete_locals(wanted_days)
+                server.push(wanted_days, delete=True)
 
 
 if __name__ == "__main__":
@@ -120,10 +117,7 @@ if __name__ == "__main__":
     final_folder = env_vars['TARGET']
 
     all_stations = [RealFm("https://www.real.gr/realfm/"),
-                    Parapolitika("https://dromos.ddns.net")]
+                    Parapolitika()]
+    wanted_stations = []
     server = Server(temp_folder,final_folder)
     app.run(debug=True, port=5000, host='0.0.0.0')
-
-
-
-
