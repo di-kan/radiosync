@@ -49,9 +49,17 @@ class Archive:
 
     def populate(self, archive_list):
         for show in archive_list:
+            print(show['desc'])
             the_date_str = show['desc'].split(' ')[0]
+            print(the_date_str)
             the_date_str = re.sub(r'[^0-9/]','',the_date_str)
-            the_date = datetime.strptime(the_date_str, "%d/%m/%Y").date()
+            print(the_date_str)
+            try:
+                the_date = datetime.strptime(the_date_str, "%d/%m/%Y").date()
+            except ValueError:
+                the_date_str = "01/01/2021"
+                the_date = datetime.strptime(the_date_str, "%d/%m/%Y").date()
+            print(the_date_str)
             day_url = show['url']
             description = show['desc']
             self.days.append(ADay(self.show, day_url, description, the_date, self.station))
