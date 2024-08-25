@@ -11,6 +11,7 @@ import re
 import os
 from file import File
 from yt_dlp import YoutubeDL
+from time import sleep
 
 
 class Station(ABC):
@@ -21,6 +22,16 @@ class Station(ABC):
 
     def select(self):
         self.selected = True
+        disconnected = True
+        while disconnected:
+            try:
+                self._soup = get_soup(self.start_url)
+            except Exception as e:
+                print(e)
+                print("sleeping for 10s")
+                sleep(10)
+            else:
+                disconnected=False
         self.scan()
 
     def get_shows_list(self):
@@ -63,8 +74,7 @@ class RealFm(Station):
     def __init__(self, start_url="https://www.real.gr/realfm/"):
         super().__init__()
         self.title = 'Real FM'
-        self.start_url = start_url
-        self._soup = get_soup(start_url)
+        self.start_url = start_url        
 
     def scan(self):
         """Scans the website and populates the list of Shows"""
@@ -166,7 +176,6 @@ class Parapolitika(Station):
     def __init__(self, start_url="https://www.parapolitika.gr/parapolitikafm/"):
         super().__init__()
         self.start_url = start_url
-        self._soup = get_soup(start_url)
         self.shows = []
         self.title = "Παραπολιτικά"
 
